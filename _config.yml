@@ -33,7 +33,7 @@ plugins:
 #   - vendor/ruby/
 title: TeaShull's GitHub Docs
 email: test@thisisonlyatest.emailsite.org
-description: Welcome to the bioinformatics tutorial corner. Here I will post examples of the bioinformatics tools I have written, and provide tutorials for common bioninformatics workflows for plant biology research. 
+description: Practical examples for pipelines I have written, and tutorials for common workflows in plant biology research. 
 
 url: "https://teashull.github.io"
 github_username:  TeaShull
