@@ -31,8 +31,8 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-title: TeaShull's GitHub Docs
-email: test@thisisonlyatest.emailsite.org
+title: Tutorials Corner
+email: less.tact_0m@icloud.com
 description: Practical examples for pipelines I have written, and tutorials for common workflows in plant biology research. 
 
 url: "https://teashull.github.io"
