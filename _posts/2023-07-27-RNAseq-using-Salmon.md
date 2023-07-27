@@ -19,7 +19,7 @@ We will cover:
 
 
 ## Preamble
-The data cleaning step of this tutorial is broadly applicable to any workflow and errs on the conservative side with multiple quality checks. Once the data is cleaned, there are many ways to proceed with alignment. here we using Salmon, an efficient psuedo-alignment program.  
+The data cleaning step of this tutorial is broadly applicable to any workflow and errs on the conservative side with multiple quality checks. Once the data is cleaned, there are many ways to proceed with alignment. here we use Salmon, an efficient psuedo-alignment program.  
 
 ## Setting up your environment
 This tutorial uses open-source bioinformatics tools and R.
