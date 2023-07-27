@@ -20,7 +20,3 @@ git clone
 {% endhighlight %}
 
  <img src="{{site.baseurl}}/assets/img/2H.png">
-
-[jekyll-docs]: https://jekyllrb.com/docs/home
-[jekyll-gh]:   https://github.com/jekyll/jekyll
-[jekyll-talk]: https://talk.jekyllrb.com/
