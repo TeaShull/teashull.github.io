@@ -10,7 +10,6 @@ url: " https://teashull.github.io/" # the base hostname & protocol for your site
 remote_theme: jekyll/minima
 
 plugins:
-  - jekyll-seo-tag
   - jekyll-feed
   - jekyll-remote-theme
 
