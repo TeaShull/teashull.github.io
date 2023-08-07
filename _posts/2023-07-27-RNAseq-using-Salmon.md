@@ -81,8 +81,19 @@ mkdir ./rCorr
 {% endhighlight %}
 
 {% highlight ruby %}
-rcorrector -ek 20000000000 -t $threads -od ./rCorr -1 ../${cName}_1.fq -2 ../${cName}_2.fq
-rcorrector -ek 20000000000 -t $threads -od ./rCorr -1 ../${tName}_1.fq -2 ../${tName}_2.fq
+rcorrector \
+    -ek 20000000000 \
+    -t $threads \
+    -od ./rCorr \
+    -1 ../${cName}_1.fq \
+    -2 ../${cName}_2.fq
+
+rcorrector \
+    -ek 20000000000 \
+    -t $threads \
+    -od ./rCorr \
+    -1 ../${tName}_1.fq \
+    -2 ../${tName}_2.fq
 {% endhighlight %}
 
 {% highlight ruby %}
@@ -94,8 +105,29 @@ python ../FilterUncorrectabledPEfastq.py -1 ${tName}_1.cor.fq -2 ${tName}_2.cor.
 
 ### Remove unfixable reads
 {% highlight ruby %}
-trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${cName}_1.cor.fq unfixrm_${cName}_2.cor.fq
-trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${tName}_1.cor.fq unfixrm_${tName}_2.cor.fq
+trim_galore \
+    -j 8 \
+    --paired \
+    --retain_unpaired \
+    --phred33 \
+    --output_dir ./trimmed_reads \
+    --length 36 \
+    -q 5 \
+    --stringency 1 \
+    -e 0.1
+    unfixrm_${cName}_1.cor.fq unfixrm_${cName}_2.cor.fq
+
+trim_galore \
+    -j 8 \
+    --paired \
+    --retain_unpaired \
+    --phred33 \
+    --output_dir ./trimmed_reads \
+    --length 36 \
+    -q 5 \
+    --stringency 1 \
+     -e 0.1 \
+     unfixrm_${tName}_1.cor.fq unfixrm_${tName}_2.cor.fq
 {% endhighlight %}
 
 
@@ -189,7 +221,23 @@ ln -s ../riboMap/clean_${cName}_2.fq ./clean_${tName}_2.fq
 {% endhighlight %}
 
 {% highlight ruby %}
-salmon quant -i ../athal_index -l A -1 clean_${cName}_1.fq -2 clean_${cName}_2.fq --gcBias -p 20 --validateMappings -o ${cName}_transQ
-salmon quant -i ../athal_index -l A -1 clean_${tName}_1.fq -2 clean_${tName}_2.fq --gcBias -p 20 --validateMappings -o ${tName}_transQ
+salmon quant \
+    -i ../athal_index \
+    -l A -1 clean_${cName}_1.fq \
+    -2 clean_${cName}_2.fq \
+    --gcBias \
+    -p 20 \
+    --validateMappings \
+    -o ${cName}_transQ
+
+salmon quant \
+    -i ../athal_index \
+    -l A \
+    -1 clean_${tName}_1.fq \
+    -2 clean_${tName}_2.fq \
+    --gcBias \
+    -p 20 \
+    --validateMappings \
+    -o ${tName}_transQ
 {% endhighlight %}
 
