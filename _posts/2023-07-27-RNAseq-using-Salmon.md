@@ -273,8 +273,10 @@ k <- keys(txdb, keytype = "TXNAME")
 tx2gene <- select(txdb, k, "GENEID", "TXNAME")
 write.csv(tx2gene, file = "./TAIR10tx2gene.gencode.v27.csv")
 head(tx2gene)
+{% endhighlight %}
 
-#File Variables, to avoid having to change the file names
+## add variables to avoid having to change the file names
+{% highlight ruby %}
 TP = "2H"
 {% endhighlight %}
 
@@ -285,16 +287,22 @@ tx2gene <- read_csv("./TAIR10tx2gene.gencode.v27.csv")
 {% endhighlight %}
 
 ## Read in sample list (file names and factors)
+In order to set up the analysis, we need to create a file containing the file names and factors. 
 {% highlight ruby %}
 samples <- read.table(file = paste0(TP, "/samples.txt"), header = T)
 head(samples)
-#Retrieve file paths for salmon .sf files
+{% endhighlight %}
+
+## Retrieve file paths for salmon .sf files
+{% highlight ruby %}
 files <- file.path(TP, paste0(samples$samples,"_quant.sf") )
 names(files) <- paste0("sample", 1:6)
 all(file.exists(files))
 head(files)
+{% endhighlight %}
 
-#Import salmon .sf files, and summarize to gene using tx2gene databas
+## Import salmon .sf files, and summarize to gene using tx2gene database
+{% highlight ruby %}
 txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
 {% endhighlight %}
 
