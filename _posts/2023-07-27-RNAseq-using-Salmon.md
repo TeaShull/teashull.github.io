@@ -47,27 +47,32 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
  <img src="{{site.baseurl}}/assets/img/HBTdwnl.jpeg">
 
 ## Data cleaning
-First, we will assess the quality of the raw data using FASTQC
+First, we will assess the quality of the raw data using FASTQC ([How to read and interperate FastQC reports](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html))
+
+mkdir qcRaw
+
 {% highlight ruby %}
-fastqc --threads 24 --outdir ./ ./$2_1.cor.fq
-fastqc --threads 24 --outdir ./ ./$2_2.cor.fq
+fastqc --threads 24 --outdir ./qcRaw ./$2_1.fq.gz
+fastqc --threads 24 --outdir ./qcRaw ./$2_2.fq.gz
 {% endhighlight %}
 
 ### Running rCorrector
-rCorrector will repair read pairs which are low quality. The unfixable read pairs will also be removed during this process. 
+rCorrector will repair read pairs which are low quality.
 {% highlight ruby %}
-rcorrector -ek 20000000000 -t 24 -od ./ -1 ${2}_1.fq -2 ${2}_2.fq
+mkdir ./rCorr
 {% endhighlight %}
 
 {% highlight ruby %}
-python ./FilterUncorrectabledPEfastq.py -1 ${2}_1.cor.fq -2 ${2}_2.cor.fq -s $2
+rcorrector -ek 20000000000 -t 24 -od ./rCorr -1 ../${2}_1.fq -2 ../${2}_2.fq
 {% endhighlight %}
-
 
 {% highlight ruby %}
-mkdir ./trimmed_reads
+cd rCorr
+python ../FilterUncorrectabledPEfastq.py -1 ${2}_1.cor.fq -2 ${2}_2.cor.fq -s $2
 {% endhighlight %}
 
+
+### Remove unfixable reads
 {% highlight ruby %}
 trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${2}_1.cor.fq unfixrm_${2}_2.cor.fq
 {% endhighlight %}
@@ -113,39 +118,20 @@ bowtie2 --quiet --very-sensitive-local --phred33  \
     --un-gz blacklist_unpaired_unaligned_${2}.fq.gz
 {% endhighlight %}
 
-Create the directory structure for your outputs
+Navigate to your primary working directory, and create a directory for your FastQC outputs of your cleaned data
 {% highlight ruby %}
+cd ..
 mkdir ./qcClean
 cd ./qcClean
 {% endhighlight %}
 
-soft-link your data, which is now cleaned from rRNA contamination
+Reasses the quality of your data using FastQC. 
 {% highlight ruby %}
-ln -s ../riboMap/clean_${2}_1.fq ./clean_${2}_1.fq
-ln -s ../riboMap/clean_${2}_2.fq ./clean_${2}_2.fq
+fastqc --threads 24 --outdir ./ ../riboMap/clean_${2}_1.fq
+fastqc --threads 24 --outdir ./ ../riboMap/clean_${2}_2.fq
 {% endhighlight %}
 
-Reasses the quality of your data. 
-{% highlight ruby %}
-fastqc --threads 24 --outdir ./ ./clean_$2_1.fq
-fastqc --threads 24 --outdir ./ ./clean_$2_2.fq
-{% endhighlight %}
-
-{% highlight ruby %}
-rm clean_${2}_1.fq
-rm clean_${2}_2.fq
-{% endhighlight %}
-
-{% highlight ruby %}
-mkdir ./rcorrected
-cd ./rcorrected
-{% endhighlight %}
-
-{% highlight ruby %}
-ln -s ../../rCorr/${2}_1.cor.fq ./${2}_1.cor.fq
-ln -s ../../rCorr/${2}_2.cor.fq ./${2}_2.cor.fq
-{% endhighlight %}
-
+At this point, your data should be in good shape. 
 
 ### Make *Arabidopsis thaliana* index
 First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/")).   
