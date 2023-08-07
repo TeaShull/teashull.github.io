@@ -67,7 +67,6 @@ mkdir ./trimmed_reads
 trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${2}_1.cor.fq unfixrm_${2}_2.cor.fq
 {% endhighlight %}
 
-
 {% highlight ruby %}
 mkdir riboMap   
 cd riboMap  
@@ -88,9 +87,10 @@ Unzip the files, concatonate them and replace "U" in the fasta sequences with "T
 
 {% highlight ruby %}
 gunzip ./*
-cat SILVA_138.1_LSURef_NR99_tax_silva.fasta > SILVArRNAdb.fa
-cat SILVA_138.1_SSURef_NR99_tax_silva.fasta > SILVArRNAdb.fa
-sed '/^[^>]/s/U/T/g' file.fasta > SILVAcDNAdb.fa
+cat SILVA_138.1_LSURef_NR99_tax_silva.fasta > SILVArRNAdb.fa.temp
+cat SILVA_138.1_SSURef_NR99_tax_silva.fasta > SILVArRNAdb.fa.temp
+sed '/^[^>]/s/U/T/g' SILVArRNAdb.fa.temp > SILVAcDNAdb.fa
+rm SILVArRNAdb.fa.temp
 {% endhighlight %}
 
 
