@@ -46,21 +46,31 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 
  <img src="{{site.baseurl}}/assets/img/HBTdwnl.jpeg">
 
-### A quick note on the string variable {name}. 
-If you wish to make all of this code run without editing it, you can simply set the $name variable in your bash session.
+### A quick note on the string variable {cName}. 
+If you wish to make all of this code run without editing it, you can simply set the $cName variable in your bash session. Here, we will simply cName our data DA2. 
 
 {% highlight ruby %}
-name='WhateverYourReadsAreCalled'
+cName='cDA2'
+tName='tDA2'
+{% endhighlight %}
+
+## Data procurement
+First we need to download our data. For this we will use Sequence Reach Archive Tools
+
+{% highlight ruby %}
+
 {% endhighlight %}
 
 ## Data cleaning
-First, we will assess the quality of the raw data using FASTQC ([How to read and interperate FastQC reports](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html))
+Assess the quality of the raw data using FASTQC ([How to read and interperate FastQC reports](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html))
 
 mkdir qcRaw
 
 {% highlight ruby %}
-fastqc --threads 24 --outdir ./qcRaw ./${name}_1.fq.gz
-fastqc --threads 24 --outdir ./qcRaw ./${name}_2.fq.gz
+fastqc --threads 12 --outdir ./qcRaw ./${cName}_1.fq.gz
+fastqc --threads 12 --outdir ./qcRaw ./${cName}_2.fq.gz
+fastqc --threads 12 --outdir ./qcRaw ./${tName}_1.fq.gz
+fastqc --threads 12 --outdir ./qcRaw ./${tName}_2.fq.gz
 {% endhighlight %}
 
 ### Running rCorrector
@@ -70,18 +80,21 @@ mkdir ./rCorr
 {% endhighlight %}
 
 {% highlight ruby %}
-rcorrector -ek 20000000000 -t 24 -od ./rCorr -1 ../${name}_1.fq -2 ../${name}_2.fq
+rcorrector -ek 20000000000 -t 12 -od ./rCorr -1 ../${cName}_1.fq -2 ../${cName}_2.fq
+rcorrector -ek 20000000000 -t 12 -od ./rCorr -1 ../${tName}_1.fq -2 ../${tName}_2.fq
 {% endhighlight %}
 
 {% highlight ruby %}
 cd rCorr
-python ../FilterUncorrectabledPEfastq.py -1 ${name}_1.cor.fq -2 ${name}_2.cor.fq -s ${name}
+python ../FilterUncorrectabledPEfastq.py -1 ${cName}_1.cor.fq -2 ${cName}_2.cor.fq -s ${cName}
+python ../FilterUncorrectabledPEfastq.py -1 ${tName}_1.cor.fq -2 ${tName}_2.cor.fq -s ${tName}
 {% endhighlight %}
 
 
 ### Remove unfixable reads
 {% highlight ruby %}
-trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${name}_1.cor.fq unfixrm_${name}_2.cor.fq
+trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${cName}_1.cor.fq unfixrm_${cName}_2.cor.fq
+trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${tName}_1.cor.fq unfixrm_${tName}_2.cor.fq
 {% endhighlight %}
 
 
@@ -112,19 +125,30 @@ sed '/^[^>]/s/U/T/g' SILVArRNAdb.fa.temp > SILVAcDNAdb.fa
 rm SILVArRNAdb.fa.temp
 {% endhighlight %}
 
-Align the reads using Bowie2 to the rRNA blacklist. Those reads which *do not* align to the blacklist will be output as clean_{name}_1.fq.gz and clean_{name}_2.fq.gz
+Align the reads using Bowie2 to the rRNA blacklist. Those reads which *do not* align to the blacklist will be output as clean_{cName}_1.fq.gz and clean_{cName}_2.fq.gz
 
 {% highlight ruby %}
 bowtie2 --quiet --very-sensitive-local --phred33  \
     -x SILVAcDNAdb \
-    -1 ../rCorr/trimmed_reads/unfixrm_${name}_1.cor_val_1.fq \
-    -2 ../rCorr/trimmed_reads/unfixrm_${name}_2.cor_val_2.fq \
-    --threads 22 \
-    --met-file ${name}_bowtie2_metrics.txt \
-    --al-conc-gz blacklist_paired_aligned_${name}.fq.gz \
-    --un-conc-gz clean_${name}.fq.gz  \
-    --al-gz blacklist_unpaired_aligned_${name}.fq.gz \
-    --un-gz blacklist_unpaired_unaligned_${name}.fq.gz
+    -1 ../rCorr/trimmed_reads/unfixrm_${cName}_1.cor_val_1.fq \
+    -2 ../rCorr/trimmed_reads/unfixrm_${cName}_2.cor_val_2.fq \
+    --threads 12 \
+    --met-file ${cName}_bowtie2_metrics.txt \
+    --al-conc-gz blacklist_paired_aligned_${cName}.fq.gz \
+    --un-conc-gz clean_${cName}.fq.gz  \
+    --al-gz blacklist_unpaired_aligned_${cName}.fq.gz \
+    --un-gz blacklist_unpaired_unaligned_${cName}.fq.gz
+
+bowtie2 --quiet --very-sensitive-local --phred33  \
+    -x SILVAcDNAdb \
+    -1 ../rCorr/trimmed_reads/unfixrm_${tName}_1.cor_val_1.fq \
+    -2 ../rCorr/trimmed_reads/unfixrm_${tName}_2.cor_val_2.fq \
+    --threads 12 \
+    --met-file ${tName}_bowtie2_metrics.txt \
+    --al-conc-gz blacklist_paired_aligned_${tName}.fq.gz \
+    --un-conc-gz clean_${tName}.fq.gz  \
+    --al-gz blacklist_unpaired_aligned_${tName}.fq.gz \
+    --un-gz blacklist_unpaired_unaligned_${tName}.fq.gz
 {% endhighlight %}
 
 Navigate to your primary working directory, and create a directory for your FastQC outputs of your cleaned data
@@ -136,8 +160,10 @@ cd ./qcClean
 
 Reasses the quality of your data using FastQC. 
 {% highlight ruby %}
-fastqc --threads 24 --outdir ./ ../riboMap/clean_${name}_1.fq
-fastqc --threads 24 --outdir ./ ../riboMap/clean_${name}_2.fq
+fastqc --threads 12 --outdir ./ ../riboMap/clean_${cName}_1.fq
+fastqc --threads 12 --outdir ./ ../riboMap/clean_${cName}_2.fq
+fastqc --threads 12 --outdir ./ ../riboMap/clean_${tName}_1.fq
+fastqc --threads 12 --outdir ./ ../riboMap/clean_${tName}_2.fq
 {% endhighlight %}
 
 At this point, your data should be in good shape. 
@@ -155,11 +181,14 @@ Soft-link your cleaned FQ files. Not really necissary, but makes the run command
 {% highlight ruby %}
 mkdir salmon_out
 cd salmon_out
-ln -s ../riboMap/clean_${name}_1.fq ./clean_${name}_1.fq
-ln -s ../riboMap/clean_${name}_2.fq ./clean_${name}_2.fq
+ln -s ../riboMap/clean_${cName}_1.fq ./clean_${cName}_1.fq
+ln -s ../riboMap/clean_${cName}_2.fq ./clean_${cName}_2.fq
+ln -s ../riboMap/clean_${cName}_1.fq ./clean_${tName}_1.fq
+ln -s ../riboMap/clean_${cName}_2.fq ./clean_${tName}_2.fq
 {% endhighlight %}
 
 {% highlight ruby %}
-salmon quant -i ../athal_index -l A -1 clean_${name}_1.fq -2 clean_${name}_2.fq --gcBias -p 20 --validateMappings -o ${name}_transQ
+salmon quant -i ../athal_index -l A -1 clean_${cName}_1.fq -2 clean_${cName}_2.fq --gcBias -p 20 --validateMappings -o ${cName}_transQ
+salmon quant -i ../athal_index -l A -1 clean_${tName}_1.fq -2 clean_${tName}_2.fq --gcBias -p 20 --validateMappings -o ${tName}_transQ
 {% endhighlight %}
 
