@@ -52,7 +52,7 @@ tName='tDA2'
 threads='20'
 {% endhighlight %}
 
-# Quantification of reads using Salmon
+# Quantification of Reads Using Salmon
 <img src="{{site.baseurl}}/assets/img/salmon.png">
 ## Get data (or use your own)
 First we need to download our data. For this we will use Sequence Reach Archive Tools.
@@ -98,7 +98,9 @@ rcorrector \
 {% highlight ruby %}
 cd rCorr
 python ../FilterUncorrectabledPEfastq.py -1 ${cName}_1.cor.fq -2 ${cName}_2.cor.fq -s ${cName}
+
 python ../FilterUncorrectabledPEfastq.py -1 ${tName}_1.cor.fq -2 ${tName}_2.cor.fq -s ${tName}
+
 {% endhighlight %}
 
 
@@ -243,7 +245,7 @@ salmon quant \
 {% endhighlight %}
 
 
-# Statistical Analysis of count data using R
+# Statistical Analysis of Count Data Using R
 <img src="{{site.baseurl}}/assets/img/Rstudio.png">
 
 First we need to download the gene features file for the Arabidopsis transcriptome. This will the production of gene-level abundence estemates using [tximport](https://f1000research.com/articles/4-1521). This step dramatically simplifies analysis and the interpritation of results. 
