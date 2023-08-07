@@ -55,6 +55,7 @@ threads='20'
 {% endhighlight %}
 
 # Quantification of reads using Salmon
+<img src="{{site.baseurl}}/assets/img/salmon.png">
 ## Get data (or use your own)
 First we need to download our data. For this we will use Sequence Reach Archive Tools.
 
@@ -202,7 +203,6 @@ fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_2.fq
 At this point, your data should be in good shape. 
 
 ## Generate count data using Salmon
-<img src="{{site.baseurl}}/assets/img/salmon.png">
 
 ### Make *Arabidopsis thaliana* index
 First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/")).   
@@ -246,6 +246,8 @@ salmon quant \
 
 
 # Statistical Analysis of count data using R
+<img src="{{site.baseurl}}/assets/img/Rstudio.png">
+
 First we need to download the gene features file for the Arabidopsis transcriptome. This will the production of gene-level abundence estemates using [tximport](https://f1000research.com/articles/4-1521). This step dramatically simplifies analysis and the interpritation of results. 
 
 {% highlight ruby %}
