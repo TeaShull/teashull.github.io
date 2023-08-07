@@ -5,7 +5,7 @@ date:   2023-07-26 15:24:42 -0400
 ---
 
 
-
+# Preamble
 This tutorial will cover a boilerplate RNAseq analysis using Salmon psuedo-alignment of illumina generated paired-end reads to the *Arabidopsis thaliana* transcriptome.  
 
 Reads are from a publically available dataset for testing the [transcriptomic response of *Arabidopsis thaliana* to dopamine](https://doi.org/10.3390/stresses3010026). 
@@ -17,8 +17,6 @@ We will cover:
 - Annotation, heatmap production and cluster analysis
 - Gene Set Enrichment Analysis (R)
 
-
-## Preamble
 The data cleaning step of this tutorial is broadly applicable to any workflow and errs on the conservative side with multiple quality checks. Once the data is cleaned, there are many ways to proceed with alignment. here we use Salmon, an efficient psuedo-alignment program.  
 
 ## Setting up your environment
@@ -55,14 +53,15 @@ tName='tDA2'
 threads='20'
 {% endhighlight %}
 
-## Get some data (or use your own)
+# Quantification of reads using Salmon
+## Get data (or use your own)
 First we need to download our data. For this we will use Sequence Reach Archive Tools.
 
 {% highlight ruby %}
 
 {% endhighlight %}
 
-## Data cleaning
+## Clean Data
 Assess the quality of the raw data using FASTQC ([How to read and interperate FastQC reports](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html))
 
 mkdir qcRaw
@@ -74,7 +73,7 @@ fastqc --threads $threads --outdir ./qcRaw ./${tName}_1.fq.gz
 fastqc --threads $threads --outdir ./qcRaw ./${tName}_2.fq.gz
 {% endhighlight %}
 
-### Running rCorrector
+### Run rCorrector
 rCorrector will repair read pairs which are low quality.
 {% highlight ruby %}
 mkdir ./rCorr
@@ -131,7 +130,7 @@ trim_galore \
 {% endhighlight %}
 
 
-### Remove reads originating from rRNA
+### Remove reads originating from ribsomal RNA
 Most modern RNAseq library prep methods are very good at minimizing rRNA contamination, but there is always *some*.  
 
 To correct for this, we are going to map our reads to the SILVA rRNA blacklist, and output those reads which don't align. This will remove rRNA contamination. 
@@ -201,6 +200,7 @@ fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_2.fq
 
 At this point, your data should be in good shape. 
 
+## Generate count data using Salmon
 ### Make *Arabidopsis thaliana* index
 First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/")).   
 
@@ -241,3 +241,5 @@ salmon quant \
     -o ${tName}_transQ
 {% endhighlight %}
 
+
+# Statistical Analysis of count data using R
