@@ -245,6 +245,8 @@ salmon quant \
 # Statistical Analysis of count data using R
 Now it's time to leave the bash environment and fire up R studio. 
 
+## install needed libraries and load them up
+{% highlight ruby %}
 setwd("./")
 library('edgeR')
 library('RColorBrewer')
@@ -253,7 +255,7 @@ library("tximport")
 library("readr")
 library("tximport")
 library("edgeR")
-
+{% endhighlight %}
 ## make TxDB for TAIR
 
 {% highlight ruby %}
@@ -273,8 +275,10 @@ TP = "2H"
 {% highlight ruby %}
 #Read in tx2gene database
 tx2gene <- read_csv("./TAIR10tx2gene.gencode.v27.csv")
+{% endhighlight %}
 
-#Read in sample list (file names and factors)
+## Read in sample list (file names and factors)
+{% highlight ruby %}
 samples <- read.table(file = paste0(TP, "/samples.txt"), header = T)
 head(samples)
 {% endhighlight %}
@@ -295,6 +299,7 @@ head(cts)
 seqDataGroups <- c(paste0(TP,"_0", TP, "_0", TP, "_0", TP,"_50", TP, "_50", TP, "_50"))
 seqDataGroups
 {% endhighlight %}
+
 # use edgeR function DGEList to make read count list
 d <- DGEList(counts=cts,group=factor(seqDataGroups))
 head(d)
