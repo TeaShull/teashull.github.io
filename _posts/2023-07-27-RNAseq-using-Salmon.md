@@ -281,7 +281,6 @@ tx2gene <- read_csv("./TAIR10tx2gene.gencode.v27.csv")
 {% highlight ruby %}
 samples <- read.table(file = paste0(TP, "/samples.txt"), header = T)
 head(samples)
-{% endhighlight %}
 #Retrieve file paths for salmon .sf files
 files <- file.path(TP, paste0(samples$samples,"_quant.sf") )
 names(files) <- paste0("sample", 1:6)
@@ -301,6 +300,7 @@ seqDataGroups
 {% endhighlight %}
 
 # use edgeR function DGEList to make read count list
+{% highlight ruby %}
 d <- DGEList(counts=cts,group=factor(seqDataGroups))
 head(d)
 {% endhighlight %}
