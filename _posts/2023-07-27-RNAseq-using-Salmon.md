@@ -244,6 +244,12 @@ salmon quant \
 
 
 # Statistical Analysis of count data using R
+First we need to download the gene features file for the Arabidopsis transcriptome. This will the production of gene-level abundence estemates using [tximport](https://f1000research.com/articles/4-1521). This step dramatically simplifies analysis and the interpritation of results. 
+
+{% highlight ruby %}
+wget "https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAIR10_gff3/TAIR10_GFF3_genes.gff"
+{% endhighlight %}
+
 Now it's time to leave the bash environment and fire up R studio. 
 
 ## install needed libraries and load them up
