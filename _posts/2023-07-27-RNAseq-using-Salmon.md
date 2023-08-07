@@ -46,16 +46,17 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 
  <img src="{{site.baseurl}}/assets/img/HBTdwnl.jpeg">
 
-### A quick note on the string variable {cName}. 
-If you wish to make all of this code run without editing it, you can simply set the $cName variable in your bash session. Here, we will simply cName our data DA2. 
+### Variables {cName}, {tName} and {threads} 
+If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.  
 
 {% highlight ruby %}
 cName='cDA2'
 tName='tDA2'
+threads='20'
 {% endhighlight %}
 
-## Data procurement
-First we need to download our data. For this we will use Sequence Reach Archive Tools
+## Get some data (or use your own)
+First we need to download our data. For this we will use Sequence Reach Archive Tools.
 
 {% highlight ruby %}
 
@@ -67,10 +68,10 @@ Assess the quality of the raw data using FASTQC ([How to read and interperate Fa
 mkdir qcRaw
 
 {% highlight ruby %}
-fastqc --threads 12 --outdir ./qcRaw ./${cName}_1.fq.gz
-fastqc --threads 12 --outdir ./qcRaw ./${cName}_2.fq.gz
-fastqc --threads 12 --outdir ./qcRaw ./${tName}_1.fq.gz
-fastqc --threads 12 --outdir ./qcRaw ./${tName}_2.fq.gz
+fastqc --threads $threads --outdir ./qcRaw ./${cName}_1.fq.gz
+fastqc --threads $threads --outdir ./qcRaw ./${cName}_2.fq.gz
+fastqc --threads $threads --outdir ./qcRaw ./${tName}_1.fq.gz
+fastqc --threads $threads --outdir ./qcRaw ./${tName}_2.fq.gz
 {% endhighlight %}
 
 ### Running rCorrector
@@ -80,8 +81,8 @@ mkdir ./rCorr
 {% endhighlight %}
 
 {% highlight ruby %}
-rcorrector -ek 20000000000 -t 12 -od ./rCorr -1 ../${cName}_1.fq -2 ../${cName}_2.fq
-rcorrector -ek 20000000000 -t 12 -od ./rCorr -1 ../${tName}_1.fq -2 ../${tName}_2.fq
+rcorrector -ek 20000000000 -t $threads -od ./rCorr -1 ../${cName}_1.fq -2 ../${cName}_2.fq
+rcorrector -ek 20000000000 -t $threads -od ./rCorr -1 ../${tName}_1.fq -2 ../${tName}_2.fq
 {% endhighlight %}
 
 {% highlight ruby %}
@@ -132,7 +133,7 @@ bowtie2 --quiet --very-sensitive-local --phred33  \
     -x SILVAcDNAdb \
     -1 ../rCorr/trimmed_reads/unfixrm_${cName}_1.cor_val_1.fq \
     -2 ../rCorr/trimmed_reads/unfixrm_${cName}_2.cor_val_2.fq \
-    --threads 12 \
+    --threads $threads \
     --met-file ${cName}_bowtie2_metrics.txt \
     --al-conc-gz blacklist_paired_aligned_${cName}.fq.gz \
     --un-conc-gz clean_${cName}.fq.gz  \
@@ -143,7 +144,7 @@ bowtie2 --quiet --very-sensitive-local --phred33  \
     -x SILVAcDNAdb \
     -1 ../rCorr/trimmed_reads/unfixrm_${tName}_1.cor_val_1.fq \
     -2 ../rCorr/trimmed_reads/unfixrm_${tName}_2.cor_val_2.fq \
-    --threads 12 \
+    --threads $threads \
     --met-file ${tName}_bowtie2_metrics.txt \
     --al-conc-gz blacklist_paired_aligned_${tName}.fq.gz \
     --un-conc-gz clean_${tName}.fq.gz  \
@@ -160,10 +161,10 @@ cd ./qcClean
 
 Reasses the quality of your data using FastQC. 
 {% highlight ruby %}
-fastqc --threads 12 --outdir ./ ../riboMap/clean_${cName}_1.fq
-fastqc --threads 12 --outdir ./ ../riboMap/clean_${cName}_2.fq
-fastqc --threads 12 --outdir ./ ../riboMap/clean_${tName}_1.fq
-fastqc --threads 12 --outdir ./ ../riboMap/clean_${tName}_2.fq
+fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_1.fq
+fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_2.fq
+fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_1.fq
+fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_2.fq
 {% endhighlight %}
 
 At this point, your data should be in good shape. 
