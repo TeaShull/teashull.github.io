@@ -3,10 +3,8 @@ layout: post
 title:  "RNA-seq using Salmon (under development)"
 date:   2023-07-26 15:24:42 -0400
 ---
- <img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
-
-
 # Preamble
+<img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
 This tutorial will cover a boilerplate RNAseq analysis using Salmon psuedo-alignment of illumina generated paired-end reads to the *Arabidopsis thaliana* transcriptome.  
 
 Reads are from a publically available dataset for testing the [transcriptomic response of *Arabidopsis thaliana* to dopamine](https://doi.org/10.3390/stresses3010026). 
