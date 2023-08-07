@@ -5,7 +5,7 @@ date:   2023-07-26 15:24:42 -0400
 ---
 # Preamble
 <img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
-This tutorial will cover a boilerplate RNAseq analysis using Salmon psuedo-alignment of illumina generated paired-end reads to the *Arabidopsis thaliana* transcriptome.  
+This tutorial will cover a boilerplate RNAseq analysis using Salmon psuedo-alignment of illumina generated paired-end reads to the *Arabidopsis thaliana* transcriptome. This is a line-by-line explanation of the RNAseq workflow posted [here](). While running this tutorial line-by-line can be a useful to learn the various data transformation steps, some things, such as for loops and variable storage are a little awkward to run line-by-line in a terminal.
 
 Reads are from a publically available dataset for testing the [transcriptomic response of *Arabidopsis thaliana* to dopamine](https://doi.org/10.3390/stresses3010026). 
 
@@ -13,10 +13,8 @@ We will cover:
 - Data cleaning (shell and other tools)
 - Alignment of reads (Salmon)
 - Statistical analysis of alignment data (R and edgeR)
-- Annotation, heatmap production and cluster analysis
-- Gene Set Enrichment Analysis (R)
 
-The data cleaning step of this tutorial is broadly applicable to any workflow and errs on the conservative side with multiple quality checks. Once the data is cleaned, there are many ways to proceed with alignment. here we use Salmon, an efficient psuedo-alignment program.  
+The data cleaning step of this tutorial is broadly applicable to any workflow and errs on the conservative side with multiple quality checks. Once the data is cleaned, there are many ways to proceed with alignment. here we use Salmon, an efficient psuedo-alignment program. 
 
 ## Setting up your environment
 This tutorial uses open-source bioinformatics tools and R.
@@ -43,8 +41,14 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 
  <img src="{{site.baseurl}}/assets/img/HBTdwnl.jpeg">
 
-### Variables {cName}, {tName} and {threads} 
-If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.  
+### Variables 
+#### {cName}_{i}, {tName}_{i} and {threads} 
+If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.
+
+#### reps
+Set this variable as a list of your replicate measurements. For nearly every command in the following section, we will be using a for loop to run each command on all of the replicates. In our example, we will have 3.
+
+declare -a reps=("R1" "R2" "R3")
 
 {% highlight ruby %}
 cName='cDA2'
@@ -67,12 +71,15 @@ Assess the quality of the raw data using FASTQC ([How to read and interperate Fa
 mkdir qcRaw
 
 {% highlight ruby %}
-fastqc --threads $threads --outdir ./qcRaw ./${cName}_1.fq.gz
-fastqc --threads $threads --outdir ./qcRaw ./${cName}_2.fq.gz
-fastqc --threads $threads --outdir ./qcRaw ./${tName}_1.fq.gz
-fastqc --threads $threads --outdir ./qcRaw ./${tName}_2.fq.gz
-{% endhighlight %}
 
+for i in "${reps[@]}"
+do
+    fastqc --threads $threads --outdir ./qcRaw ./${cName}_{i}_1.fq.gz
+    fastqc --threads $threads --outdir ./qcRaw ./${cName}_{i}_2.fq.gz
+    fastqc --threads $threads --outdir ./qcRaw ./${tName}_{i}_1.fq.gz
+    fastqc --threads $threads --outdir ./qcRaw ./${tName}_{i}_2.fq.gz
+done
+{% endhighlight %}
 ### Run rCorrector
 rCorrector will repair read pairs which are low quality.
 {% highlight ruby %}
@@ -80,58 +87,58 @@ mkdir ./rCorr
 {% endhighlight %}
 
 {% highlight ruby %}
-rcorrector \
-    -ek 20000000000 \
-    -t $threads \
-    -od ./rCorr \
-    -1 ../${cName}_1.fq \
-    -2 ../${cName}_2.fq
-
-rcorrector \
-    -ek 20000000000 \
-    -t $threads \
-    -od ./rCorr \
-    -1 ../${tName}_1.fq \
-    -2 ../${tName}_2.fq
+for i in "${reps[@]}"
+do
+    rcorrector \
+        -ek 20000000000 \
+        -t $threads \
+        -od ./rCorr \
+        -1 ../${cName}_{i}_1.fq \
+        -2 ../${cName}_{i}_2.fq
+    rcorrector \
+        -ek 20000000000 \
+        -t $threads \
+        -od ./rCorr \
+        -1 ../${tName}_{i}_1.fq \
+        -2 ../${tName}_{i}_2.fq
+done
 {% endhighlight %}
-
 {% highlight ruby %}
 cd rCorr
-python ../FilterUncorrectabledPEfastq.py -1 ${cName}_1.cor.fq -2 ${cName}_2.cor.fq -s ${cName}
-
-python ../FilterUncorrectabledPEfastq.py -1 ${tName}_1.cor.fq -2 ${tName}_2.cor.fq -s ${tName}
-
+for i in "${reps[@]}"
+do
+    python ../FilterUncorrectabledPEfastq.py -1 ${cName}_{i}_1.cor.fq -2 ${cName}_{i}_2.cor.fq -s ${cName}_{i}
+    python ../FilterUncorrectabledPEfastq.py -1 ${tName}_{i}_1.cor.fq -2 ${tName}_{i}_2.cor.fq -s ${tName}_{i}
+done
 {% endhighlight %}
-
-
 ### Remove unfixable reads
 {% highlight ruby %}
-trim_galore \
-    -j 8 \
-    --paired \
-    --retain_unpaired \
-    --phred33 \
-    --output_dir ./trimmed_reads \
-    --length 36 \
-    -q 5 \
-    --stringency 1 \
-    -e 0.1
-    unfixrm_${cName}_1.cor.fq unfixrm_${cName}_2.cor.fq
-
-trim_galore \
-    -j 8 \
-    --paired \
-    --retain_unpaired \
-    --phred33 \
-    --output_dir ./trimmed_reads \
-    --length 36 \
-    -q 5 \
-    --stringency 1 \
-     -e 0.1 \
-     unfixrm_${tName}_1.cor.fq unfixrm_${tName}_2.cor.fq
+for i in "${reps[@]}"
+do
+    trim_galore \
+        -j 8 \
+        --paired \
+        --retain_unpaired \
+        --phred33 \
+        --output_dir ./trimmed_reads \
+        --length 36 \
+        -q 5 \
+        --stringency 1 \
+        -e 0.1
+        unfixrm_${cName}_{i}_1.cor.fq unfixrm_${cName}_{i}_2.cor.fq
+    trim_galore \
+        -j 8 \
+        --paired \
+        --retain_unpaired \
+        --phred33 \
+        --output_dir ./trimmed_reads \
+        --length 36 \
+        -q 5 \
+        --stringency 1 \
+         -e 0.1 \
+         unfixrm_${tName}_{i}_1.cor.fq unfixrm_${tName}_{i}_2.cor.fq
+done
 {% endhighlight %}
-
-
 ### Remove reads originating from ribsomal RNA
 Most modern RNAseq library prep methods are very good at minimizing rRNA contamination, but there is always *some*.  
 
@@ -159,30 +166,32 @@ sed '/^[^>]/s/U/T/g' SILVArRNAdb.fa.temp > SILVAcDNAdb.fa
 rm SILVArRNAdb.fa.temp
 {% endhighlight %}
 
-Align the reads using Bowie2 to the rRNA blacklist. Those reads which *do not* align to the blacklist will be output as clean_{cName}_1.fq.gz and clean_{cName}_2.fq.gz
-
+Align the reads using Bowie2 to the rRNA blacklist. Those reads which *do not* align to the blacklist will be output as clean_{cName}_{i}_1.fq.gz and clean_{cName}_{i}_2.fq.gz
 {% highlight ruby %}
-bowtie2 --quiet --very-sensitive-local --phred33  \
-    -x SILVAcDNAdb \
-    -1 ../rCorr/trimmed_reads/unfixrm_${cName}_1.cor_val_1.fq \
-    -2 ../rCorr/trimmed_reads/unfixrm_${cName}_2.cor_val_2.fq \
-    --threads $threads \
-    --met-file ${cName}_bowtie2_metrics.txt \
-    --al-conc-gz blacklist_paired_aligned_${cName}.fq.gz \
-    --un-conc-gz clean_${cName}.fq.gz  \
-    --al-gz blacklist_unpaired_aligned_${cName}.fq.gz \
-    --un-gz blacklist_unpaired_unaligned_${cName}.fq.gz
+for i in "${reps[@]}"
+do
+    bowtie2 --quiet --very-sensitive-local --phred33  \
+        -x SILVAcDNAdb \
+        -1 ../rCorr/trimmed_reads/unfixrm_${cName}_{i}_1.cor_val_1.fq \
+        -2 ../rCorr/trimmed_reads/unfixrm_${cName}_{i}_2.cor_val_2.fq \
+        --threads $threads \
+        --met-file ${cName}_{i}_bowtie2_metrics.txt \
+        --al-conc-gz blacklist_paired_aligned_${cName}_{i}.fq.gz \
+        --un-conc-gz clean_${cName}_{i}.fq.gz  \
+        --al-gz blacklist_unpaired_aligned_${cName}_{i}.fq.gz \
+        --un-gz blacklist_unpaired_unaligned_${cName}_{i}.fq.gz
 
-bowtie2 --quiet --very-sensitive-local --phred33  \
-    -x SILVAcDNAdb \
-    -1 ../rCorr/trimmed_reads/unfixrm_${tName}_1.cor_val_1.fq \
-    -2 ../rCorr/trimmed_reads/unfixrm_${tName}_2.cor_val_2.fq \
-    --threads $threads \
-    --met-file ${tName}_bowtie2_metrics.txt \
-    --al-conc-gz blacklist_paired_aligned_${tName}.fq.gz \
-    --un-conc-gz clean_${tName}.fq.gz  \
-    --al-gz blacklist_unpaired_aligned_${tName}.fq.gz \
-    --un-gz blacklist_unpaired_unaligned_${tName}.fq.gz
+    bowtie2 --quiet --very-sensitive-local --phred33  \
+        -x SILVAcDNAdb \
+        -1 ../rCorr/trimmed_reads/unfixrm_${tName}_{i}_1.cor_val_1.fq \
+        -2 ../rCorr/trimmed_reads/unfixrm_${tName}_{i}_2.cor_val_2.fq \
+        --threads $threads \
+        --met-file ${tName}_{i}_bowtie2_metrics.txt \
+        --al-conc-gz blacklist_paired_aligned_${tName}_{i}.fq.gz \
+        --un-conc-gz clean_${tName}_{i}.fq.gz  \
+        --al-gz blacklist_unpaired_aligned_${tName}_{i}.fq.gz \
+        --un-gz blacklist_unpaired_unaligned_${tName}_{i}.fq.gz
+done
 {% endhighlight %}
 
 Navigate to your primary working directory, and create a directory for your FastQC outputs of your cleaned data
@@ -194,14 +203,15 @@ cd ./qcClean
 
 Reasses the quality of your data using FastQC. 
 {% highlight ruby %}
-fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_1.fq
-fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_2.fq
-fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_1.fq
-fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_2.fq
+for i in "${reps[@]}"
+do
+    fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_{i}_1.fq
+    fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_{i}_2.fq
+    fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_{i}_1.fq
+    fastqc --threads $threads --outdir ./ ../riboMap/clean_${tName}_{i}_2.fq
+done
 {% endhighlight %}
-
 At this point, your data should be in good shape. 
-
 ## Generate count data using Salmon
 
 ### Make *Arabidopsis thaliana* index
@@ -217,34 +227,31 @@ Soft-link your cleaned FQ files. Not really necissary, but makes the run command
 {% highlight ruby %}
 mkdir salmon_out
 cd salmon_out
-ln -s ../riboMap/clean_${cName}_1.fq ./clean_${cName}_1.fq
-ln -s ../riboMap/clean_${cName}_2.fq ./clean_${cName}_2.fq
-ln -s ../riboMap/clean_${cName}_1.fq ./clean_${tName}_1.fq
-ln -s ../riboMap/clean_${cName}_2.fq ./clean_${tName}_2.fq
+    for i in "${reps[@]}"
+    do
+    ln -s ../riboMap/clean_${cName}_{i}_1.fq ./clean_${cName}_{i}_1.fq
+    ln -s ../riboMap/clean_${cName}_{i}_2.fq ./clean_${cName}_{i}_2.fq
+    ln -s ../riboMap/clean_${cName}_{i}_1.fq ./clean_${tName}_{i}_1.fq
+    ln -s ../riboMap/clean_${cName}_{i}_2.fq ./clean_${tName}_{i}_2.fq
+    salmon quant \
+        -i ../athal_index \
+        -l A -1 clean_${cName}_{i}_1.fq \
+        -2 clean_${cName}_{i}_2.fq \
+        --gcBias \
+        -p 20 \
+        --validateMappings \
+        -o ${cName}_{i}_transQ
+    salmon quant \
+        -i ../athal_index \
+        -l A \
+        -1 clean_${tName}_{i}_1.fq \
+        -2 clean_${tName}_{i}_2.fq \
+        --gcBias \
+        -p 20 \
+        --validateMappings \
+        -o ${tName}_{i}_transQ
+done
 {% endhighlight %}
-
-{% highlight ruby %}
-salmon quant \
-    -i ../athal_index \
-    -l A -1 clean_${cName}_1.fq \
-    -2 clean_${cName}_2.fq \
-    --gcBias \
-    -p 20 \
-    --validateMappings \
-    -o ${cName}_transQ
-
-salmon quant \
-    -i ../athal_index \
-    -l A \
-    -1 clean_${tName}_1.fq \
-    -2 clean_${tName}_2.fq \
-    --gcBias \
-    -p 20 \
-    --validateMappings \
-    -o ${tName}_transQ
-{% endhighlight %}
-
-
 # Statistical Analysis of Count Data Using R
 <img src="{{site.baseurl}}/assets/img/Rstudio.png">
 
@@ -304,7 +311,6 @@ names(files) <- paste0("sample", 1:6)
 all(file.exists(files))
 head(files)
 {% endhighlight %}
-
 ## Import salmon .sf files, and summarize to gene using tx2gene database
 {% highlight ruby %}
 txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
@@ -317,7 +323,6 @@ head(cts)
 seqDataGroups <- c(paste0(TP,"_0", TP, "_0", TP, "_0", TP,"_50", TP, "_50", TP, "_50"))
 seqDataGroups
 {% endhighlight %}
-
 # use edgeR function DGEList to make read count list
 {% highlight ruby %}
 d <- DGEList(counts=cts,group=factor(seqDataGroups))
