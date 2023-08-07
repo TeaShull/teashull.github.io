@@ -3,6 +3,7 @@ layout: post
 title:  "RNA-seq using Salmon (under development)"
 date:   2023-07-26 15:24:42 -0400
 ---
+ <img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
 
 
 # Preamble
