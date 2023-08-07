@@ -47,6 +47,11 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
  <img src="{{site.baseurl}}/assets/img/HBTdwnl.jpeg">
 
 ## Data cleaning
+First, we will assess the quality of the raw data using FASTQC
+{% highlight ruby %}
+fastqc --threads 24 --outdir ./ ./$2_1.cor.fq
+fastqc --threads 24 --outdir ./ ./$2_2.cor.fq
+{% endhighlight %}
 
 ### Running rCorrector
 rCorrector will repair read pairs which are low quality. The unfixable read pairs will also be removed during this process. 
@@ -67,15 +72,17 @@ mkdir ./trimmed_reads
 trim_galore -j 8 --paired --retain_unpaired --phred33 --output_dir ./trimmed_reads --length 36 -q 5 --stringency 1 -e 0.1 unfixrm_${2}_1.cor.fq unfixrm_${2}_2.cor.fq
 {% endhighlight %}
 
-{% highlight ruby %}
-mkdir riboMap   
-cd riboMap  
-{% endhighlight %}
 
 ### Remove reads originating from rRNA
 Most modern RNAseq library prep methods are very good at minimizing rRNA contamination, but there is always *some*.  
 
 To correct for this, we are going to map our reads to the SILVA rRNA blacklist, and output those reads which don't align. This will remove rRNA contamination. 
+
+First, lets create a directory to keep things organized
+{% highlight ruby %}
+mkdir riboMap   
+cd riboMap  
+{% endhighlight %}
 
 Download the SILVA rRNA blacklists for the Large and Small subunits, which we will subsequently use to clean our reads of rRNA contamination.
 {% highlight ruby %}
@@ -93,12 +100,18 @@ sed '/^[^>]/s/U/T/g' SILVArRNAdb.fa.temp > SILVAcDNAdb.fa
 rm SILVArRNAdb.fa.temp
 {% endhighlight %}
 
-
 {% highlight ruby %}
-bowtie2 --quiet --very-sensitive-local --phred33  -x SILVAcDNAdb -1 ../rCorr/trimmed_reads/unfixrm_${2}_1.cor_val_1.fq -2 ../rCorr/trimmed_reads/unfixrm_${2}_2.cor_val_2.fq --threads 22 --met-file ${2}_bowtie2_metrics.txt --al-conc-gz blacklist_paired_aligned_${2}.fq.gz --un-conc-gz clean_blacklist_paired_unaligned_${2}.fq.gz  --al-gz blacklist_unpaired_aligned_${2}.fq.gz --un-gz blacklist_unpaired_unaligned_${2}.fq.gz
+bowtie2 --quiet --very-sensitive-local --phred33  \
+    -x SILVAcDNAdb \
+    -1 ../rCorr/trimmed_reads/unfixrm_${2}_1.cor_val_1.fq \
+    -2 ../rCorr/trimmed_reads/unfixrm_${2}_2.cor_val_2.fq \
+    --threads 22 \
+    --met-file ${2}_bowtie2_metrics.txt \
+    --al-conc-gz blacklist_paired_aligned_${2}.fq.gz \
+    --un-conc-gz clean_${2}.fq.gz  \
+    --al-gz blacklist_unpaired_aligned_${2}.fq.gz \
+    --un-gz blacklist_unpaired_unaligned_${2}.fq.gz
 {% endhighlight %}
-
-### Run fastQC
 
 Create the directory structure for your outputs
 {% highlight ruby %}
@@ -129,17 +142,13 @@ cd ./rcorrected
 {% endhighlight %}
 
 {% highlight ruby %}
-#ln -s ../../rCorr/${2}_1.cor.fq ./${2}_1.cor.fq
-#ln -s ../../rCorr/${2}_2.cor.fq ./${2}_2.cor.fq
+ln -s ../../rCorr/${2}_1.cor.fq ./${2}_1.cor.fq
+ln -s ../../rCorr/${2}_2.cor.fq ./${2}_2.cor.fq
 {% endhighlight %}
 
-{% highlight ruby %}
-#fastqc --threads 24 --outdir ./ ./$2_1.cor.fq
-#fastqc --threads 24 --outdir ./ ./$2_2.cor.fq
-{% endhighlight %}
 
 ### Make *Arabidopsis thaliana* index
-First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/").   
+First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/")).   
 
 {% highlight ruby %}
 wget -O athal.fa.gz "ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz"
