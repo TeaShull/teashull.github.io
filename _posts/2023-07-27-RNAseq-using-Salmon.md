@@ -161,7 +161,3 @@ ln -s ../riboMap/clean_${name}_2.fq ./clean_${name}_2.fq
 salmon quant -i ../athal_index -l A -1 clean_${name}_1.fq -2 clean_${name}_2.fq --gcBias -p 20 --validateMappings -o ${name}_transQ
 {% endhighlight %}
 
- <img src="{{site.baseurl}}/assets/img/2H.png">
-
-{% highlight ruby %}
-{% endhighlight %}
