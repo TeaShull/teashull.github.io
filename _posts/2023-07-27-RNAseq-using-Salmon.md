@@ -14,7 +14,7 @@ Reads are from a publically available dataset for testing the [transcriptomic re
 We will cover:  
 - Data cleaning (shell and other tools)
 - Alignment of reads (Salmon)
-- Statistical analysis of alignment data (R and DeSeq2)
+- Statistical analysis of alignment data (R and edgeR)
 - Annotation, heatmap production and cluster analysis
 - Gene Set Enrichment Analysis (R)
 
