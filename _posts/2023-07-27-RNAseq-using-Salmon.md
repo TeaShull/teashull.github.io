@@ -138,7 +138,16 @@ cd ./rcorrected
 #fastqc --threads 24 --outdir ./ ./$2_2.cor.fq
 {% endhighlight %}
 
-### Make *Arabidopsis thaliana* index and run Salmon
+### Make *Arabidopsis thaliana* index
+First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([documentation]"https://salmon.readthedocs.io/en/latest/index.html"). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes]"https://www.biostars.org/p/456231/").   
+
+{% highlight ruby %}
+wget -O athal.fa.gz "ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz"
+salmon index -t athal.fa.gz -i athal_index
+{% endhighlight %}
+
+### Run Salmon
+Soft-link your cleaned FQ files. Not really necissary, but makes the run command tidier. 
 {% highlight ruby %}
 mkdir salmon_out
 cd salmon_out
@@ -151,3 +160,6 @@ salmon quant -i ../athal_index -l A -1 clean_${2}_1.fq -2 clean_${2}_2.fq --gcBi
 {% endhighlight %}
 
  <img src="{{site.baseurl}}/assets/img/2H.png">
+
+{% highlight ruby %}
+{% endhighlight %}
