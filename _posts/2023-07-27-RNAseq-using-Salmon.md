@@ -49,7 +49,9 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 ### A quick note on the string variable {name}. 
 If you wish to make all of this code run without editing it, you can simply set the $name variable in your bash session.
 
+{% highlight ruby %}
 name='WhateverYourReadsAreCalled'
+{% endhighlight %}
 
 ## Data cleaning
 First, we will assess the quality of the raw data using FASTQC ([How to read and interperate FastQC reports](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html))
@@ -110,9 +112,9 @@ sed '/^[^>]/s/U/T/g' SILVArRNAdb.fa.temp > SILVAcDNAdb.fa
 rm SILVArRNAdb.fa.temp
 {% endhighlight %}
 
-{% highlight ruby %}
 Align the reads using Bowie2 to the rRNA blacklist. Those reads which *do not* align to the blacklist will be output as clean_{name}_1.fq.gz and clean_{name}_2.fq.gz
 
+{% highlight ruby %}
 bowtie2 --quiet --very-sensitive-local --phred33  \
     -x SILVAcDNAdb \
     -1 ../rCorr/trimmed_reads/unfixrm_${name}_1.cor_val_1.fq \
