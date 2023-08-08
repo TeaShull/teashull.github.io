@@ -288,11 +288,9 @@ BiocManager::install(version = "3.17")
 
 BiocManager::install("edgeR")
 BiocManager::install("tximport")
-install.packages("tidyverse")
 
 library('edgeR')
 library('tximport')
-library('tidyverse')
 
 {% endhighlight %}
 ## make TxDB for TAIR
@@ -307,11 +305,6 @@ write.csv(tx2gene, file = "./TAIR10tx2gene.gencode.v27.csv")
 head(tx2gene)
 {% endhighlight %}
 
-## add variables to avoid having to change the file names
-{% highlight r %}
-TP = "2H"
-{% endhighlight %}
-
 ## Import data using tximport
 {% highlight r %}
 #Read in tx2gene database
@@ -319,15 +312,17 @@ tx2gene <- read_csv("./TAIR10tx2gene.gencode.v27.csv")
 {% endhighlight %}
 
 ## Read in sample list (file names and factors)
-In order to set up the analysis, we need to create a file containing the file names and factors. 
+In order to set up the analysis, we need to create a dataframe containing our experimental design. We have two conditions with three replicates each. 
 {% highlight r %}
-samples <- read.table(file = paste0(TP, "/samples.txt"), header = T)
+samples <- data.frame(samples = c('cDA2_R1', 'cDA2_R2', 'cDA2_R3', 'tDA2_R1', 'tDA2_R2', 'tDA2_R3'),
+                      condition = rep(LETTERS[1:2], each = 3))
+
 head(samples)
 {% endhighlight %}
 
 ## Retrieve file paths for salmon .sf files
 {% highlight r %}
-files <- file.path(TP, paste0(samples$samples,"_quant.sf") )
+files <- file.path(paste0(samples$samples,"_quant.sf") 
 names(files) <- paste0("sample", 1:6)
 all(file.exists(files))
 head(files)
@@ -341,12 +336,11 @@ txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
 {% highlight r %}
 cts <- txi$counts
 head(cts)
-seqDataGroups <- c(paste0(TP,"_0", TP, "_0", TP, "_0", TP,"_50", TP, "_50", TP, "_50"))
-seqDataGroups
+
 {% endhighlight %}
 # use edgeR function DGEList to make read count list
-{% highlight bash %}
-d <- DGEList(counts=cts,group=factor(seqDataGroups))
+{% highlight r %}
+d <- DGEList(counts=cts,group=factor(samples$condition))
 head(d)
 {% endhighlight %}
 ## Data Filtering
@@ -355,8 +349,6 @@ dim(d)
 d.full <- d # keep in case things go awry
 head(d$counts)
 head(cpm(d))
-
-#total counts/sample
 apply(d$counts,2,sum)
 {% endhighlight %}
 
@@ -366,51 +358,65 @@ keep <- rowSums(cpm(d)>100) >= 2
 keep
 d <- d[keep,]
 dim (d)
-
 d$samples$lib.size <- colSums(d$counts)
 d$samples
-
+{% endhighlight %}
+## Normalize data
+{% highlight r %}
 d <- calcNormFactors(d, logratioTrim = 0)
 d
-
+{% endhighlight %}
+## Run sample-wise PCA, to check sample grouping
+{% highlight r %}
 plotMDS(d, method="bcv", col=as.numeric(d$samples$group))
-
+{% endhighlight %}
+## Estimate and plot dispersion of tags vs Log~2~ Fold Change (FC)
+{% highlight r %}
 d1 <- estimateCommonDisp(d, verbose=T)
 names(d1)
 
 d1 <- estimateTagwiseDisp(d1)
 names(d1)
 plotBCV(d1)
-
+{% endhighlight %}
+## make design matrix, estimate common dispersion and trended dispersion
+{% highlight r %}
 design.mat <- model.matrix(~ 0 + d$samples$group)
 colnames(design.mat) <- levels(d$samples$group)
 d2 <- estimateGLMCommonDisp(d,design.mat)
 d2 <- estimateGLMTrendedDisp(d2,design.mat, method="power")
 
-# You can change method to "auto", "bin.spline", "power", "spline", "bin.loess".
-# The default is "auto" which chooses "bin.spline" when > 200 tags and "power" otherwise.
 d2 <- estimateGLMTagwiseDisp(d2,design.mat)
 plotBCV(d2)
-
+{% endhighlight %}
+## Run Fishers Exact Test, comparing the control vs the treatment
+{% highlight r %}
 et12 <- exactTest(d1, pair=c(1,2)) # compare groups 1 and 2
+{% endhighlight %}
+## Check out your top DEGs.
+{% highlight r %}
 topTags(et12,n=100)
-
-
+{% endhighlight %}
+## Identify significant DE genes (*P* < 0.05) and adjust for multiple comparisons
+{% highlight r %}
 #de1 <- decideTestsDGE(et12, adjust.method="BH", p.value=0.05)
 #for GSEA, uncomment above for standard analysis
 
 de1 <- decideTestsDGE(et12, adjust.method="BH")
 summary(de1)
-
-# differentially expressed tags from the naive method in d1
+{% endhighlight %}
+## differentially expressed tags from the naive method in d1, make volcano plot
+{% highlight r %}
 de1tags12 <- rownames(d1)[as.logical(de1)] 
 plotSmear(et12, de.tags=de1tags12)
 abline(h = c(-2, 2), col = "blue")
 design.mat
 fit <- glmFit(d2, design.mat)
 summary(de1)
-
-DE <- topTags(et12,n=50000)
+{% endhighlight %}
+## Save all our results in a CSV. 
+{% highlight r %}
+DE <- topTags(et12,n=5000)
 as.data.frame(DE)
 write.csv(DE, paste0("./edgeRout_", TP, "_LRT0.csv"))
 {% endhighlight %}
