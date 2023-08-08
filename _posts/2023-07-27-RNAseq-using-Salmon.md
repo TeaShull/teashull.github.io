@@ -280,19 +280,24 @@ wget "https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAI
 Now it's time to leave the bash environment and fire up R studio. 
 
 ## install needed libraries and load them up
-{% highlight bash %}
+{% highlight r %}
 setwd("./")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(version = "3.17")
+
+BiocManager::install("edgeR")
+BiocManager::install("tximport")
+install.packages("tidyverse")
+
 library('edgeR')
-library('RColorBrewer')
-library("GenomicFeatures")
-library("tximport")
-library("readr")
-library("tximport")
-library("edgeR")
+library('tximport')
+library('tidyverse')
+
 {% endhighlight %}
 ## make TxDB for TAIR
 
-{% highlight bash %}
+{% highlight r %}
 gtffile <- "./TAIR10_GFF3_genes.gff"
 file.exists(gtffile)
 txdb <- makeTxDbFromGFF(gtffile, format = "gff3", circ_seqs = character())
@@ -303,25 +308,25 @@ head(tx2gene)
 {% endhighlight %}
 
 ## add variables to avoid having to change the file names
-{% highlight bash %}
+{% highlight r %}
 TP = "2H"
 {% endhighlight %}
 
 ## Import data using tximport
-{% highlight bash %}
+{% highlight r %}
 #Read in tx2gene database
 tx2gene <- read_csv("./TAIR10tx2gene.gencode.v27.csv")
 {% endhighlight %}
 
 ## Read in sample list (file names and factors)
 In order to set up the analysis, we need to create a file containing the file names and factors. 
-{% highlight bash %}
+{% highlight r %}
 samples <- read.table(file = paste0(TP, "/samples.txt"), header = T)
 head(samples)
 {% endhighlight %}
 
 ## Retrieve file paths for salmon .sf files
-{% highlight bash %}
+{% highlight r %}
 files <- file.path(TP, paste0(samples$samples,"_quant.sf") )
 names(files) <- paste0("sample", 1:6)
 all(file.exists(files))
@@ -333,7 +338,7 @@ txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
 {% endhighlight %}
 
 ## Prep Data for EdgeR 
-{% highlight bash %}
+{% highlight r %}
 cts <- txi$counts
 head(cts)
 seqDataGroups <- c(paste0(TP,"_0", TP, "_0", TP, "_0", TP,"_50", TP, "_50", TP, "_50"))
@@ -345,7 +350,7 @@ d <- DGEList(counts=cts,group=factor(seqDataGroups))
 head(d)
 {% endhighlight %}
 ## Data Filtering
-{% highlight bash %}
+{% highlight r %}
 dim(d)
 d.full <- d # keep in case things go awry
 head(d$counts)
@@ -356,7 +361,7 @@ apply(d$counts,2,sum)
 {% endhighlight %}
 
 ## Trim lowly-abundant genes. cpm number can be changed based on library size, and detected tags.
-{% highlight bash %}
+{% highlight r %}
 keep <- rowSums(cpm(d)>100) >= 2
 keep
 d <- d[keep,]
