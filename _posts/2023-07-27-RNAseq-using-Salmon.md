@@ -47,11 +47,9 @@ packages include:
 If you don't have R and R-studio installed, get it installed.
 
 ### one last thing to download...
-Finally, there is a python script from the Harvard Bioinformatics team which is useful here. Go to the link below, download the python script and place it in the working directory you have chosen to use for this tutorial. 
+Finally, there is a python script from the Harvard Bioinformatics team which is useful here. Download the python script and place it in the working directory you have chosen to use for this tutorial. 
 
-[FilterUncorrectabledPEfastq.py](https://github.com//TranscriptomeAssemblyTools/blob/dfe258636088c11eb60d3ce69da2fd5cd00ef5b3/FilterUncorrectabledPEfastq.py)
-
- <img src="{{site.baseurl}}/assets/img/HBTdwnl.jpeg">
+[FilterUncorrectabledPEfastq.py]({{site.baseurl}}/assets/FilterUncorrectabledPEfastq.py)
 
 ### Variables 
 #### {cName}_{i}, {tName}_{i} and {threads} 
