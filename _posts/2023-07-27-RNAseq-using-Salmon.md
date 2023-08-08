@@ -414,6 +414,9 @@ design.mat
 fit <- glmFit(d2, design.mat)
 summary(de1)
 {% endhighlight %}
+
+<img src="{{site.baseurl}}/assets/img/DA2H.png">
+
 ## Save all our results in a CSV. 
 {% highlight r %}
 DE <- topTags(et12,n=5000)
