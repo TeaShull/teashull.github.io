@@ -45,7 +45,7 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 #### {cName}_{i}, {tName}_{i} and {threads} 
 If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.
 
-{% highlight ruby %}
+{% highlight bash %}
 cName='cDA2'
 tName='tDA2'
 threads='20'
@@ -54,7 +54,7 @@ threads='20'
 #### reps
 Set this variable as a list of your replicate measurements. For nearly every command in the following section, we will be using a for loop to run each command on all of the replicates. In our example, we will have 3.
 
-{% highlight ruby %}
+{% highlight bash %}
 declare -a reps=("R1" "R2" "R3")
 {% endhighlight %}
 
@@ -63,7 +63,7 @@ declare -a reps=("R1" "R2" "R3")
 ## Get data (or use your own)
 First we need to download our data. For this we will use Sequence Reach Archive Tools.
 
-{% highlight ruby %}
+{% highlight bash %}
 fasterq-dump --fasta --split-files SRX18321587
 mv SRX18321587_1* cDA2_R1_1.fq
 mv SRX18321587_2* cDA2_R1_2.fq
@@ -89,7 +89,7 @@ Assess the quality of the raw data using FASTQC ([How to read and interperate Fa
 
 mkdir qcRaw
 
-{% highlight ruby %}
+{% highlight bash %}
 
 for i in "${reps[@]}"
 do
@@ -101,11 +101,11 @@ done
 {% endhighlight %}
 ### Run rCorrector
 rCorrector will repair read pairs which are low quality.
-{% highlight ruby %}
+{% highlight bash %}
 mkdir ./rCorr
 {% endhighlight %}
 
-{% highlight ruby %}
+{% highlight bash %}
 for i in "${reps[@]}"
 do
     rcorrector \
@@ -122,7 +122,7 @@ do
         -2 ../${tName}_{i}_2.fq
 done
 {% endhighlight %}
-{% highlight ruby %}
+{% highlight bash %}
 cd rCorr
 for i in "${reps[@]}"
 do
@@ -131,7 +131,7 @@ do
 done
 {% endhighlight %}
 ### Remove unfixable reads
-{% highlight ruby %}
+{% highlight bash %}
 for i in "${reps[@]}"
 do
     trim_galore \
@@ -164,20 +164,20 @@ Most modern RNAseq library prep methods are very good at minimizing rRNA contami
 To correct for this, we are going to map our reads to the SILVA rRNA blacklist, and output those reads which don't align. This will remove rRNA contamination. 
 
 First, lets create a directory to keep things organized
-{% highlight ruby %}
+{% highlight bash %}
 mkdir riboMap   
 cd riboMap  
 {% endhighlight %}
 
 Download the SILVA rRNA blacklists for the Large and Small subunits, which we will subsequently use to clean our reads of rRNA contamination.
-{% highlight ruby %}
+{% highlight bash %}
 wget "https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_LSURef_NR99_tax_silva.fasta.gz"
 wget "https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz"
 {% endhighlight %}
 
 Unzip the files, concatonate them and replace "U" in the fasta sequences with "T"
 
-{% highlight ruby %}
+{% highlight bash %}
 gunzip ./*
 cat SILVA_138.1_LSURef_NR99_tax_silva.fasta > SILVArRNAdb.fa.temp
 cat SILVA_138.1_SSURef_NR99_tax_silva.fasta > SILVArRNAdb.fa.temp
@@ -186,7 +186,7 @@ rm SILVArRNAdb.fa.temp
 {% endhighlight %}
 
 Align the reads using Bowie2 to the rRNA blacklist. Those reads which *do not* align to the blacklist will be output as clean_{cName}_{i}_1.fq.gz and clean_{cName}_{i}_2.fq.gz
-{% highlight ruby %}
+{% highlight bash %}
 for i in "${reps[@]}"
 do
     bowtie2 --quiet --very-sensitive-local --phred33  \
@@ -212,13 +212,13 @@ do
 done
 {% endhighlight %}
 Navigate to your primary working directory, and create a directory for your FastQC outputs of your cleaned data
-{% highlight ruby %}
+{% highlight bash %}
 cd ..
 mkdir ./qcClean
 cd ./qcClean
 {% endhighlight %}
 Reasses the quality of your data using FastQC. 
-{% highlight ruby %}
+{% highlight bash %}
 for i in "${reps[@]}"
 do
     fastqc --threads $threads --outdir ./ ../riboMap/clean_${cName}_{i}_1.fq
@@ -233,14 +233,14 @@ At this point, your data should be in good shape.
 ### Make *Arabidopsis thaliana* index
 First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/")).   
 
-{% highlight ruby %}
+{% highlight bash %}
 wget -O athal.fa.gz "ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz"
 salmon index -t athal.fa.gz -i athal_index
 {% endhighlight %}
 
 ### Run Salmon
 Soft-link your cleaned FQ files. Not really necissary, but makes the run command tidier. 
-{% highlight ruby %}
+{% highlight bash %}
 mkdir salmon_out
 cd salmon_out
     for i in "${reps[@]}"
@@ -273,14 +273,14 @@ done
 
 First we need to download the gene features file for the Arabidopsis transcriptome. This will the production of gene-level abundence estemates using [tximport](https://f1000research.com/articles/4-1521). This step dramatically simplifies analysis and the interpritation of results. 
 
-{% highlight ruby %}
+{% highlight bash %}
 wget "https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAIR10_gff3/TAIR10_GFF3_genes.gff"
 {% endhighlight %}
 
 Now it's time to leave the bash environment and fire up R studio. 
 
 ## install needed libraries and load them up
-{% highlight ruby %}
+{% highlight bash %}
 setwd("./")
 library('edgeR')
 library('RColorBrewer')
@@ -292,7 +292,7 @@ library("edgeR")
 {% endhighlight %}
 ## make TxDB for TAIR
 
-{% highlight ruby %}
+{% highlight bash %}
 gtffile <- "./TAIR10_GFF3_genes.gff"
 file.exists(gtffile)
 txdb <- makeTxDbFromGFF(gtffile, format = "gff3", circ_seqs = character())
@@ -303,49 +303,49 @@ head(tx2gene)
 {% endhighlight %}
 
 ## add variables to avoid having to change the file names
-{% highlight ruby %}
+{% highlight bash %}
 TP = "2H"
 {% endhighlight %}
 
 ## Import data using tximport
-{% highlight ruby %}
+{% highlight bash %}
 #Read in tx2gene database
 tx2gene <- read_csv("./TAIR10tx2gene.gencode.v27.csv")
 {% endhighlight %}
 
 ## Read in sample list (file names and factors)
 In order to set up the analysis, we need to create a file containing the file names and factors. 
-{% highlight ruby %}
+{% highlight bash %}
 samples <- read.table(file = paste0(TP, "/samples.txt"), header = T)
 head(samples)
 {% endhighlight %}
 
 ## Retrieve file paths for salmon .sf files
-{% highlight ruby %}
+{% highlight bash %}
 files <- file.path(TP, paste0(samples$samples,"_quant.sf") )
 names(files) <- paste0("sample", 1:6)
 all(file.exists(files))
 head(files)
 {% endhighlight %}
 ## Import salmon .sf files, and summarize to gene using tx2gene database
-{% highlight ruby %}
+{% highlight bash %}
 txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
 {% endhighlight %}
 
 ## Prep Data for EdgeR 
-{% highlight ruby %}
+{% highlight bash %}
 cts <- txi$counts
 head(cts)
 seqDataGroups <- c(paste0(TP,"_0", TP, "_0", TP, "_0", TP,"_50", TP, "_50", TP, "_50"))
 seqDataGroups
 {% endhighlight %}
 # use edgeR function DGEList to make read count list
-{% highlight ruby %}
+{% highlight bash %}
 d <- DGEList(counts=cts,group=factor(seqDataGroups))
 head(d)
 {% endhighlight %}
 ## Data Filtering
-{% highlight ruby %}
+{% highlight bash %}
 dim(d)
 d.full <- d # keep in case things go awry
 head(d$counts)
@@ -356,7 +356,7 @@ apply(d$counts,2,sum)
 {% endhighlight %}
 
 ## Trim lowly-abundant genes. cpm number can be changed based on library size, and detected tags.
-{% highlight ruby %}
+{% highlight bash %}
 keep <- rowSums(cpm(d)>100) >= 2
 keep
 d <- d[keep,]
