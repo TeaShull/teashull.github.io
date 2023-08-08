@@ -243,8 +243,8 @@ Soft-link your cleaned FQ files. Not really necissary, but makes the run command
 {% highlight bash %}
 mkdir salmon_out
 cd salmon_out
-    for i in "${reps[@]}"
-    do
+for i in "${reps[@]}"
+do
     ln -s ../riboMap/clean_${cName}_{i}_1.fq ./clean_${cName}_{i}_1.fq
     ln -s ../riboMap/clean_${cName}_{i}_2.fq ./clean_${cName}_{i}_2.fq
     ln -s ../riboMap/clean_${cName}_{i}_1.fq ./clean_${tName}_{i}_1.fq
@@ -271,7 +271,7 @@ done
 # Statistical Analysis of Count Data Using R
 <img src="{{site.baseurl}}/assets/img/Rstudio.png">
 
-First we need to download the gene features file for the Arabidopsis transcriptome. This will the production of gene-level abundence estemates using [tximport](https://f1000research.com/articles/4-1521). This step dramatically simplifies analysis and the interpritation of results. 
+First we need to download the gene features file for the Arabidopsis transcriptome. This will allow the production of gene-level abundence estemates using [tximport](https://f1000research.com/articles/4-1521). This step dramatically simplifies analysis and the interpritation of results. 
 
 {% highlight bash %}
 wget "https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAIR10_gff3/TAIR10_GFF3_genes.gff"
