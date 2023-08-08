@@ -43,7 +43,7 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 
 ### Variables 
 #### {cName}_{i}, {tName}_{i} and {threads} 
-If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.
+If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads string variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.
 
 {% highlight bash %}
 cName='cDA2'
