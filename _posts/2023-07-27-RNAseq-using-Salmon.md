@@ -45,15 +45,17 @@ Finally, there is a python script from the Harvard Bioinformatics team which is 
 #### {cName}_{i}, {tName}_{i} and {threads} 
 If you wish to make all of this code run without editing it, you can simply set the $cName, $tName and $threads variables in your bash session. These variables are for your control read names, treatment read names and the number of threads you want to use for the analysis. Here, we will simply cName our data cDA2 and tName tDA2. The thread number is set to 20 here, for use on 24 core machines to give you some headroom for using the computer while the analysis is running.
 
-#### reps
-Set this variable as a list of your replicate measurements. For nearly every command in the following section, we will be using a for loop to run each command on all of the replicates. In our example, we will have 3.
-
-declare -a reps=("R1" "R2" "R3")
-
 {% highlight ruby %}
 cName='cDA2'
 tName='tDA2'
 threads='20'
+{% endhighlight %}
+
+#### reps
+Set this variable as a list of your replicate measurements. For nearly every command in the following section, we will be using a for loop to run each command on all of the replicates. In our example, we will have 3.
+
+{% highlight ruby %}
+declare -a reps=("R1" "R2" "R3")
 {% endhighlight %}
 
 # Data Acquisition & Cleaning
