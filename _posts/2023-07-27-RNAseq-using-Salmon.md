@@ -56,15 +56,32 @@ tName='tDA2'
 threads='20'
 {% endhighlight %}
 
-# Quantification of Reads Using Salmon
-<img src="{{site.baseurl}}/assets/img/salmon.png">
+# Data Acquisition & Cleaning
+ <img src="{{site.baseurl}}/assets/img/Cleaning.png">
 ## Get data (or use your own)
 First we need to download our data. For this we will use Sequence Reach Archive Tools.
 
 {% highlight ruby %}
-
+fasterq-dump --fasta --split-files SRX18321587
+mv SRX18321587_1* cDA2_R1_1.fq
+mv SRX18321587_2* cDA2_R1_2.fq
+fasterq-dump --fasta --split-files SRX18321588
+mv SRX18321588_1* cDA2_R2_1.fq
+mv SRX18321588_2* cDA2_R2_2.fq
+fasterq-dump --fasta --split-files SRX18321591
+mv SRX18321591_1* cDA2_R3_1.fq
+mv SRX18321591_2* cDA2_R3_2.fq
+fasterq-dump --fasta --split-files SRX18321595
+mv SRX18321595_1* tDA2_R1_1.fq
+mv SRX18321595_2* tDA2_R1_2.fq
+fasterq-dump --fasta --split-files SRX18321596
+mv SRX18321596_1* tDA2_R2_1.fq
+mv SRX18321596_2* tDA2_R2_2.fq
+fasterq-dump --fasta --split-files SRX18321597
+mv SRX18321597_1* tDA2_R3_1.fq
+mv SRX18321597_2* tDA2_R3_2.fq
+gzip *.fq
 {% endhighlight %}
-
 ## Clean Data
 Assess the quality of the raw data using FASTQC ([How to read and interperate FastQC reports](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html))
 
@@ -209,8 +226,8 @@ do
 done
 {% endhighlight %}
 At this point, your data should be in good shape. 
-## Generate count data using Salmon
-
+## Generate Count Data Using Salmon
+<img src="{{site.baseurl}}/assets/img/salmon.png">
 ### Make *Arabidopsis thaliana* index
 First, we need to download the *Arabidopsis thaliana* reference transcriptome and index it for Salmon. There are a number of options for indexing in Salmon ([docs](https://salmon.readthedocs.io/en/latest/index.html)). You may notice the documentation recommends running in *decoy-aware* mode. This can be safely ignored in Arabidopsis, as the reference transcripome is very good. For organisms with less robust reference transcriptomes decoy awareness can avoid spurious mapping of your reads ([to, for example transcribed psuedogenes](https://www.biostars.org/p/456231/")).   
 
