@@ -180,7 +180,6 @@ do
         --un-conc-gz clean_${cName}_{i}.fq.gz  \
         --al-gz blacklist_unpaired_aligned_${cName}_{i}.fq.gz \
         --un-gz blacklist_unpaired_unaligned_${cName}_{i}.fq.gz
-
     bowtie2 --quiet --very-sensitive-local --phred33  \
         -x SILVAcDNAdb \
         -1 ../rCorr/trimmed_reads/unfixrm_${tName}_{i}_1.cor_val_1.fq \
@@ -193,14 +192,12 @@ do
         --un-gz blacklist_unpaired_unaligned_${tName}_{i}.fq.gz
 done
 {% endhighlight %}
-
 Navigate to your primary working directory, and create a directory for your FastQC outputs of your cleaned data
 {% highlight ruby %}
 cd ..
 mkdir ./qcClean
 cd ./qcClean
 {% endhighlight %}
-
 Reasses the quality of your data using FastQC. 
 {% highlight ruby %}
 for i in "${reps[@]}"
