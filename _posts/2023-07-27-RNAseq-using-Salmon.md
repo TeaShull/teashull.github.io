@@ -399,9 +399,6 @@ topTags(et12,n=100)
 {% endhighlight %}
 ## Identify significant DE genes (*P* < 0.05) and adjust for multiple comparisons
 {% highlight r %}
-#de1 <- decideTestsDGE(et12, adjust.method="BH", p.value=0.05)
-#for GSEA, uncomment above for standard analysis
-
 de1 <- decideTestsDGE(et12, adjust.method="BH")
 summary(de1)
 {% endhighlight %}
