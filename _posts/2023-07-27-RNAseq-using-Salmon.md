@@ -1,9 +1,11 @@
 ---
 layout: post
 title:  "RNA-seq using Salmon"
-<img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
 date:   2023-07-26 15:24:42 -0400
 ---
+<img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
+---
+
 This tutorial will cover a boilerplate RNAseq analysis using Salmon psuedo-alignment of illumina generated paired-end reads to the *Arabidopsis thaliana* transcriptome. While running this tutorial line-by-line can be a useful to learn the various data transformation steps, some things, such as for loops and variable storage are a little awkward to run line-by-line in a terminal. Therefore, here is a link to the [bash script]({{site.baseurl}}/assets/rnaSalmon.sh) and the [R script]({{site.baseurl}}/assets/edgeR.R) to make it a little easier to follow along.
 
 Reads are from a publically available dataset for testing the [transcriptomic response of *Arabidopsis thaliana* to dopamine](https://doi.org/10.3390/stresses3010026). 
