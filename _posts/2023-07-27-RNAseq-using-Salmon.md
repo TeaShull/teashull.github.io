@@ -44,7 +44,7 @@ packages include:
 
 
 ### R
-If you don't have R and R-studio installed, get it installed. If you are in a hurry, I have included a conda environment configureation which will automatically deploy R-studio with all the R packages needed for this tutorial preconfigured.
+If you don't have R and R-studio installed, get it installed.
 
 ### one last thing to download...
 Finally, there is a python script from the Harvard Bioinformatics team which is useful here. Go to the link below, download the python script and place it in the working directory you have chosen to use for this tutorial. 
