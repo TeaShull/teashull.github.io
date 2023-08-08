@@ -52,7 +52,7 @@ threads='20'
 {% endhighlight %}
 
 #### reps
-Set this variable as a list of your replicate measurements. For nearly every command in the following section, we will be using a for loop to run each command on all of the replicates. In our example, we will have 3.
+Set this variable as an array of your replicate measurements. For nearly every command in the following section, we will be using a for loop to run each command on all of the replicates. In our example, we will have 3.
 
 {% highlight bash %}
 declare -a reps=("R1" "R2" "R3")
