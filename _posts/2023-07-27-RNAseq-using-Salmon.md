@@ -29,7 +29,7 @@ conda env create -f rnaSalmon.yml
 
 then activate the environment...
 {% highlight bash %}
-conda activate rnaSalmon{% endhighlight %}
+conda activate rnaSalmon
 {% endhighlight %}
 
 packages include: 
