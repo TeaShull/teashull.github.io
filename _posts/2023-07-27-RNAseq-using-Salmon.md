@@ -29,7 +29,7 @@ conda env create -f rnaSalmon.yml
 
 then activate the environment...
 {% highlight bash %}
-conda activate rnaSalmon
+conda activate rnaSalmon{% endhighlight %}
 {% endhighlight %}
 
 packages include: 
@@ -382,6 +382,8 @@ d
 {% highlight r %}
 plotMDS(d, method="bcv", col=as.numeric(d$samples$group))
 {% endhighlight %}
+<img src="{{site.baseurl}}/assets/img/samplePCA.png">
+
 ## Estimate and plot dispersion of tags vs Log~2~ Fold Change (FC)
 {% highlight r %}
 d1 <- estimateCommonDisp(d, verbose=T)
@@ -401,6 +403,7 @@ d2 <- estimateGLMTrendedDisp(d2,design.mat, method="power")
 d2 <- estimateGLMTagwiseDisp(d2,design.mat)
 plotBCV(d2)
 {% endhighlight %}
+<img src="{{site.baseurl}}/assets/img/dispersion_trends.png">
 ## Run Fishers Exact Test, comparing the control vs the treatment
 {% highlight r %}
 et12 <- exactTest(d1, pair=c(1,2)) # compare groups 1 and 2
