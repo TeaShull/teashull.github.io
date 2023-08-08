@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "RNA-seq using Salmon (under development)"
+title:  "RNA-seq using Salmon"
 date:   2023-07-26 15:24:42 -0400
 ---
 # Preamble
