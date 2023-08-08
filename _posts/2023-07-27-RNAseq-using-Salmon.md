@@ -20,7 +20,7 @@ The data cleaning step of this tutorial is broadly applicable to any workflow an
 This tutorial uses open-source bioinformatics tools and R.
 
 ### Installing the tools
-We will install our tools using conda. I have included a [conda environment yml]({{site.baseurl}}/assets/rnaSalmon.yml), to get things up and running quickly. Skip this step if these programs are already available to you or if you wish to install them nativly.
+We will install our tools using [conda](https://docs.conda.io/en/latest/miniconda.html). I have included a [conda environment yml]({{site.baseurl}}/assets/rnaSalmon.yml), to get things up and running quickly. Skip this step if these programs are already available to you or if you wish to install them nativly.
 
 If you go the conda route, download the [conda environment yml]({{site.baseurl}}/assets/rnaSalmon.yml) and install the environment.
 {% highlight bash %}
