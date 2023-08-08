@@ -431,5 +431,5 @@ summary(de1)
 {% highlight r %}
 DE <- topTags(et12,n=5000)
 as.data.frame(DE)
-write.csv(DE, paste0("./edgeRout_", TP, "_LRT0.csv"))
+write.csv(DE, DA2H_DEGs.csv))
 {% endhighlight %}
