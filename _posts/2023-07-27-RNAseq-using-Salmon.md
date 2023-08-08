@@ -3,7 +3,6 @@ layout: post
 title:  "RNA-seq using Salmon"
 date:   2023-07-26 15:24:42 -0400
 ---
-# Preamble
 <img src="{{site.baseurl}}/assets/img/RNAseq_flowcell_pixelart.png">
 This tutorial will cover a boilerplate RNAseq analysis using Salmon psuedo-alignment of illumina generated paired-end reads to the *Arabidopsis thaliana* transcriptome. While running this tutorial line-by-line can be a useful to learn the various data transformation steps, some things, such as for loops and variable storage are a little awkward to run line-by-line in a terminal. Therefore, here is a link to the [bash script]({{site.baseurl}}/assets/rnaSalmon.sh) and the [R script]({{site.baseurl}}/assets/edgeR.R) to make it a little easier to follow along.
 
@@ -348,7 +347,7 @@ cts <- txi$counts
 head(cts)
 
 {% endhighlight %}
-# use edgeR function DGEList to make read count list
+## Use edgeR function DGEList to make read count list
 {% highlight r %}
 d <- DGEList(counts=cts,group=factor(samples$condition))
 head(d)
@@ -391,7 +390,7 @@ d1 <- estimateTagwiseDisp(d1)
 names(d1)
 plotBCV(d1)
 {% endhighlight %}
-## make design matrix, estimate common dispersion and trended dispersion
+## Make design matrix; estimate common dispersion and trended dispersion
 {% highlight r %}
 design.mat <- model.matrix(~ 0 + d$samples$group)
 colnames(design.mat) <- levels(d$samples$group)
@@ -427,7 +426,7 @@ summary(de1)
 
 <img src="{{site.baseurl}}/assets/img/DA2H.png">
 
-## Save all our results in a CSV. 
+## Save results in a CSV. 
 {% highlight r %}
 DE <- topTags(et12,n=5000)
 as.data.frame(DE)
