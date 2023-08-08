@@ -22,6 +22,16 @@ This tutorial uses open-source bioinformatics tools and R.
 ### Installing the tools
 We will install our tools using conda. I have included a [conda environment yml]({{site.baseurl}}/assets/rnaSalmon.yml), to get things up and running quickly. Skip this step if these programs are already available to you or if you wish to install them nativly.
 
+If you go the conda route, download the [conda environment yml]({{site.baseurl}}/assets/rnaSalmon.yml) and install the environment.
+{% highlight bash %}
+conda env create -f rnaSalmon.yml
+{% endhighlight %}
+
+then activate the environment...
+{% highlight bash %}
+conda activate rnaSalmon
+{% endhighlight %}
+
 packages include: 
 
 - [FastQC](https://github.com/s-andrews/FastQC)
@@ -30,6 +40,8 @@ packages include:
 - [rCorrector](https://github.com/mourisl/Rcorrector.git)
 - [TrimGalore](https://github.com/FelixKrueger/TrimGalore.git)
 - [SRA-Tools](https://github.com/ncbi/sra-tools.git)
+
+
 
 ### R
 If you don't have R and R-studio installed, get it installed. If you are in a hurry, I have included a conda environment configureation which will automatically deploy R-studio with all the R packages needed for this tutorial preconfigured.
